@@ -1,0 +1,56 @@
+{
+  "project": "P7",
+  "version": "v0.1.0-design-preview",
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 94,
+      "sha256": "003ab602f40762a9d3e02df9738220fc0a907e39b3f061301c1b2c4177d0e2de"
+    },
+    {
+      "path": "PUBLICATION_SCOPE.md",
+      "bytes": 244,
+      "sha256": "6feb97925683b6a37408c699eee179f62bcbaf97a217f62fab16cc909b9e3d22"
+    },
+    {
+      "path": "README.md",
+      "bytes": 1620,
+      "sha256": "9f59673120fc2d94f634c842e10afd03dfe3d1d0cca05d291a9004dbdda6c658"
+    },
+    {
+      "path": "RIGHTS.md",
+      "bytes": 288,
+      "sha256": "486995d6d7051025d5eeb702b83dbe3e92d9e61312759dadf71d703ddb6f021b"
+    },
+    {
+      "path": "VALIDATION.md",
+      "bytes": 527,
+      "sha256": "6077b53e8a228fb8babc7ae0b47c702b71d2b9acacf72698ac2ee5fe6d75b5f7"
+    },
+    {
+      "path": "docs/ENGINEERING_GATE_PROTOCOL_V2.md",
+      "bytes": 8501,
+      "sha256": "40ff3cec214a9738653ab5f0ccb2bc575765e07cc319fc6097e6d56eb5e33da4"
+    },
+    {
+      "path": "docs/REFERENCES_T11_T20.md",
+      "bytes": 2122,
+      "sha256": "37163bd2a4985afb61ffcbde11c8eab4a2275f09cd34bcc9d6dca9767e99fa12"
+    },
+    {
+      "path": "docs/REFERENCES_VALIDATED.md",
+      "bytes": 4764,
+      "sha256": "bed6f063dd48b6a67b8f8088a2fdc0bd8b462c321706ae6bc7028702b1d98951"
+    },
+    {
+      "path": "docs/T01_TEST_SPEC.md",
+      "bytes": 7298,
+      "sha256": "10026ce69c700c119fcc60e8b29445ce42fce66df0b70c2557ec1cf356185645"
+    },
+    {
+      "path": "docs/THREAT_MODEL_V2.md",
+      "bytes": 35407,
+      "sha256": "3f3cd8cd8ed9e340f54d961840d796bdbf1a96a174de63748a64158f3ba206c8"
+    }
+  ]
+}
