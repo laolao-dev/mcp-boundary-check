@@ -1,0 +1,11 @@
+[project]
+name = "mcp-boundary-check"
+version = "0.1.0"
+description = "Local MCP permission-boundary demo"
+requires-python = ">=3.11"
+dependencies = ["mcp==2.2.0"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+

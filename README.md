@@ -1,15 +1,54 @@
-# MCP Boundary Check — research preview / design notes
+# MCP Boundary Check
 
-This is a public documentation snapshot of early MCP/agent trust-boundary research. It contains 20 conditional threat hypotheses, scope and observation criteria, official reference links, and a proposed engineering gate protocol.
+A runnable, local MCP permission-contract demo built on the **official Python SDK 2.2.0**. Five requests must be denied; an admin write is the positive control. This is a portfolio/research demo, not a security certification or a scanner for third-party servers.
 
-## Read the snapshot
+## Quick start
 
-Start with `docs/THREAT_MODEL_V2.md`, then `docs/ENGINEERING_GATE_PROTOCOL_V2.md`. `docs/T01_TEST_SPEC.md` describes a proposed self-owned stdio fixture. The two reference documents map hypotheses to official materials. Much of this historical design is written in Chinese.
+Python 3.11+ is required. From the repository root, use a virtual environment:
 
-## Status
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install "mcp==2.2.0"
+$env:PYTHONPATH = "$PWD/src"
+python -m mcp_boundary_check run --demo
+```
 
-**GATE_A=BLOCKED; GATE_B=NOT_RUN; RUNTIME_TEST=NOT_RUN.** These are publication-baseline statuses from the project's Current Status. No CLI, fixture, runner or executable security result is released here. Threats are hypotheses, not verified vulnerabilities. A design example or static consistency check cannot be counted as a runtime PASS.
+On macOS/Linux, activate with `source .venv/bin/activate` and set `export PYTHONPATH="$PWD/src"` before the same run command. The source package uses Python's namespace-package support; no project build backend is needed.
 
-The documents preserve their original protocol assumptions and reference dates. They are a research snapshot, not a current protocol conformance certification. See VALIDATION.md for publication checks. No private targets, credentials, raw logs, unpublished vulnerability disclosures or personal project records are included. Links point to public reference materials; their text is not bundled.
+The command starts only its own stdio fixture, uses SDK auto discovery, requires negotiated protocol **2026-07-28**, lists the tools and sends all six calls. It prints a Markdown table and writes `demo_result.md`. A nonzero exit code means a failed case or execution error.
 
-This publication does not change the formal roadmap or bypass either engineering gate. No additional redistribution license is granted for original design files; see RIGHTS.md. Questions and corrections are welcome in [Issues](https://github.com/laolao-dev/mcp-boundary-check/issues).
+Expected table:
+
+| Identity token | Case | Expected | Handler records |
+| --- | --- | --- | --- |
+| read-only | write_item | Denied | 0 |
+| read-only | delete_item | Denied | 0 |
+| other-user | Read admin's data | Denied | 0 |
+| admin | Undeclared tool argument | Rejected | 0 |
+| none | Missing token | Denied | 0 |
+| admin | write_item | Allowed | 1 |
+
+## Tests
+
+With pytest already available in your development environment:
+
+```powershell
+python -m pytest -q
+```
+
+The six parametrized tests use the same cases through a real SDK client and fixture. No pytest plugin is required. Each test run uses a temporary audit path.
+
+## How the evidence works
+
+- `core.py` adapts the protocol-independent W1 `PermissionCore`: validate arguments, resolve the principal on the server, authorize, then execute and count the operation.
+- `fixture_server.py` adapts W1's official SDK Server. The SDK owns discovery, schemas, JSON-RPC and stdio lifecycle. Tools are `read_item`, `write_item`, and `delete_item`.
+- `client.py` adapts W1's SDK Client/stdio transport. It sends each case, including unauthorized ones; it does not block them locally. SDK context managers close the child process; requests time out after 10 seconds, and the demo has a 60-second timeout.
+- Public synthetic tokens `admin`, `read-only`, and `other-user` travel in request `_meta.demo_token`. The fixture maps them to identities and roles; caller-supplied owner fields cannot grant access. Admin and read-only share the admin tenant; other-user has its own data. These tokens are **only local demo credentials**, not production authentication, stdio process identity or HTTP OAuth.
+- Only entry into an authorized operation writes a JSONL line to the unique `artifacts/demo-*.jsonl` path. Denied cases must have zero matching entries; the successful write proves logging is active and checks handler/side-effect counters. Request correlation uses `_meta.demo_case`; tokens are not logged. An existing audit file is never truncated.
+
+No Windows Job Object, observer, paid API or external server is used. The audit proves this fixture's instrumented behavior; it cannot establish zero side effects in an uninstrumented third-party server.
+
+## Earlier research
+
+`docs/` contains the historical 20-threat-model and design snapshot. Its old Gate statuses describe that publication baseline, not this demo. The W1 SDK adapter/core/client were the implementation basis; the old hand-written fixture and runner were not used. Prior research files and local evidence remain unchanged. See `RIGHTS.md` for the repository's existing rights statement.
