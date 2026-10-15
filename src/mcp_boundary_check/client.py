@@ -11,18 +11,18 @@ from mcp import Client, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 CASES = (
-    ("readonly-write", "read-only", "write_item",
+    ("readonly-write", "demo-readonly-token", "write_item",
      {"owner": "admin", "key": "note", "value": "forbidden"}, "DENY_AUTHORIZATION"),
-    ("readonly-delete", "read-only", "delete_item",
+    ("readonly-delete", "demo-readonly-token", "delete_item",
      {"owner": "admin", "key": "note"}, "DENY_AUTHORIZATION"),
-    ("cross-user-read", "other-user", "read_item",
+    ("cross-user-read", "demo-otheruser-token", "read_item",
      {"owner": "admin", "key": "note"}, "DENY_AUTHORIZATION"),
-    ("undeclared-argument", "admin", "write_item",
+    ("undeclared-argument", "demo-admin-token", "write_item",
      {"owner": "admin", "key": "note", "value": "forbidden", "unexpected": True},
      "REJECT_SCHEMA"),
     ("missing-token", None, "write_item",
      {"owner": "admin", "key": "note", "value": "forbidden"}, "DENY_AUTHENTICATION"),
-    ("admin-write", "admin", "write_item",
+    ("admin-write", "demo-admin-token", "write_item",
      {"owner": "admin", "key": "note", "value": "demo-written"}, "ALLOW"),
 )
 

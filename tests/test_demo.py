@@ -18,6 +18,10 @@ def observed(tmp_path_factory):
 def test_permission_contract(observed, index):
     results, events = observed
     result = results[index]
+    assert result["identity"] == (CASES[index][1] or "(none)")
+    assert CASES[index][1] is None or CASES[index][1] in {
+        "demo-admin-token", "demo-readonly-token", "demo-otheruser-token"
+    }
     assert result["passed"], result
     matching = [event for event in events if event["case_id"] == result["case"]]
     if result["expected"] == "ALLOW":

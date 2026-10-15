@@ -16,18 +16,18 @@ python -m mcp_boundary_check run --demo
 
 On macOS/Linux, activate with `source .venv/bin/activate` and set `export PYTHONPATH="$PWD/src"` before the same run command. The source package uses Python's namespace-package support; no project build backend is needed.
 
-The command starts only its own stdio fixture, uses SDK auto discovery, requires negotiated protocol **2026-07-28**, lists the tools and sends all six calls. It prints a Markdown table and writes `demo_result.md`. A nonzero exit code means a failed case or execution error.
+The command starts only its own stdio fixture, uses SDK auto discovery, requires negotiated protocol **2026-07-28**, lists the tools and sends all six calls. It prints a Markdown table and writes `demo_result.md`. Runtime reports and JSONL logs are ignored by Git; [examples/demo_result.sample.md](examples/demo_result.sample.md) is the single committed example. A nonzero exit code means a failed case or execution error.
 
 Expected table:
 
 | Identity token | Case | Expected | Handler records |
 | --- | --- | --- | --- |
-| read-only | write_item | Denied | 0 |
-| read-only | delete_item | Denied | 0 |
-| other-user | Read admin's data | Denied | 0 |
-| admin | Undeclared tool argument | Rejected | 0 |
+| demo-readonly-token | write_item | Denied | 0 |
+| demo-readonly-token | delete_item | Denied | 0 |
+| demo-otheruser-token | Read admin's data | Denied | 0 |
+| demo-admin-token | Undeclared tool argument | Rejected | 0 |
 | none | Missing token | Denied | 0 |
-| admin | write_item | Allowed | 1 |
+| demo-admin-token | write_item | Allowed | 1 |
 
 ## Tests
 
@@ -44,7 +44,7 @@ The six parametrized tests use the same cases through a real SDK client and fixt
 - `core.py` adapts the protocol-independent W1 `PermissionCore`: validate arguments, resolve the principal on the server, authorize, then execute and count the operation.
 - `fixture_server.py` adapts W1's official SDK Server. The SDK owns discovery, schemas, JSON-RPC and stdio lifecycle. Tools are `read_item`, `write_item`, and `delete_item`.
 - `client.py` adapts W1's SDK Client/stdio transport. It sends each case, including unauthorized ones; it does not block them locally. SDK context managers close the child process; requests time out after 10 seconds, and the demo has a 60-second timeout.
-- Public synthetic tokens `admin`, `read-only`, and `other-user` travel in request `_meta.demo_token`. The fixture maps them to identities and roles; caller-supplied owner fields cannot grant access. Admin and read-only share the admin tenant; other-user has its own data. These tokens are **only local demo credentials**, not production authentication, stdio process identity or HTTP OAuth.
+- Public synthetic tokens `demo-admin-token`, `demo-readonly-token`, and `demo-otheruser-token` travel in request `_meta.demo_token`. The fixture maps them to identities and roles; caller-supplied owner fields cannot grant access. Admin and read-only share the admin tenant; other-user has its own data. These tokens are **only local demo credentials**, not production authentication, stdio process identity or HTTP OAuth.
 - Only entry into an authorized operation writes a JSONL line to the unique `artifacts/demo-*.jsonl` path. Denied cases must have zero matching entries; the successful write proves logging is active and checks handler/side-effect counters. Request correlation uses `_meta.demo_case`; tokens are not logged. An existing audit file is never truncated.
 
 No Windows Job Object, observer, paid API or external server is used. The audit proves this fixture's instrumented behavior; it cannot establish zero side effects in an uninstrumented third-party server.

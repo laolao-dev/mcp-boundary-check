@@ -2,9 +2,9 @@
 
 # Public synthetic tokens, for this local fixture only. Not production authentication.
 PRINCIPALS = {
-    "admin": ("admin", "writer"),
-    "read-only": ("admin", "reader"),
-    "other-user": ("other-user", "writer"),
+    "demo-admin-token": ("admin", "writer"),
+    "demo-readonly-token": ("admin", "reader"),
+    "demo-otheruser-token": ("other-user", "writer"),
 }
 SCHEMAS = {}
 for _name in ("read_item", "write_item", "delete_item"):
