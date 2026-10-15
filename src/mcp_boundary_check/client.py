@@ -100,4 +100,3 @@ def markdown(results, audit_path):
               "Fixture-only permission contracts, not third-party findings or full protocol certification.",
               "Synthetic tokens in request metadata are not HTTP OAuth or production authentication."]
     return "\n".join(lines) + "\n"
-

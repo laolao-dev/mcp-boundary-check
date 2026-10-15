@@ -52,4 +52,3 @@ class PermissionCore:
             self.effects += 1
         return {"decision": "ALLOW", "value": items.get(args["key"]),
                 "handler_count": self.handlers, "side_effect_count": self.effects}, False
-

@@ -27,4 +27,3 @@ def test_permission_contract(observed, index):
     else:
         assert matching == []
     assert len(events) == 1  # positive control proves audit logging is active
-

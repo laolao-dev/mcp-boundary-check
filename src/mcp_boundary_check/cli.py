@@ -25,4 +25,3 @@ def main():
     Path("demo_result.md").write_text(report, encoding="utf-8")
     print(report)
     return code
-
