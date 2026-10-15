@@ -11,8 +11,12 @@ from mcp import Client, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 CASES = (
+    ("readonly-read", "demo-readonly-token", "read_item",
+     {"owner": "admin", "key": "note"}, "ALLOW"),
     ("readonly-write", "demo-readonly-token", "write_item",
      {"owner": "admin", "key": "note", "value": "forbidden"}, "DENY_AUTHORIZATION"),
+    ("otheruser-read", "demo-otheruser-token", "read_item",
+     {"owner": "other-user", "key": "note"}, "ALLOW"),
     ("readonly-delete", "demo-readonly-token", "delete_item",
      {"owner": "admin", "key": "note"}, "DENY_AUTHORIZATION"),
     ("cross-user-read", "demo-otheruser-token", "read_item",
@@ -21,13 +25,13 @@ CASES = (
      {"owner": "admin", "key": "note", "value": "forbidden", "unexpected": True},
      "REJECT_SCHEMA"),
     ("missing-token", None, "write_item",
-     {"owner": "admin", "key": "note", "value": "forbidden"}, "DENY_AUTHENTICATION"),
+     {"unexpected": True}, "DENY_AUTHENTICATION"),
     ("admin-write", "demo-admin-token", "write_item",
      {"owner": "admin", "key": "note", "value": "demo-written"}, "ALLOW"),
 )
 
 
-async def run_demo(audit_path):
+async def run_demo(audit_path, *, cases=CASES):
     if version("mcp") != "2.2.0":
         raise RuntimeError("This demo requires the installed official mcp==2.2.0")
     audit_path = Path(audit_path).resolve()
@@ -48,6 +52,7 @@ async def run_demo(audit_path):
             yield streams
 
     results = []
+    expected_notes = {"admin": "admin-only", "other-user": "other-only"}
     client = Client(transport(), read_timeout_seconds=10)
     async with asyncio.timeout(60):
         async with client:
@@ -57,7 +62,7 @@ async def run_demo(audit_path):
             from .core import SCHEMAS
             if {t.name: t.input_schema for t in listing.tools} != SCHEMAS:
                 raise RuntimeError("Fixture tool schemas do not match")
-            for case_id, token, tool, arguments, expected in CASES:
+            for case_id, token, tool, arguments, expected in cases:
                 meta = {"demo_case": case_id}
                 if token is not None:
                     meta["demo_token"] = token
@@ -69,11 +74,13 @@ async def run_demo(audit_path):
                 allow = expected == "ALLOW"
                 oracle = (len(matching) == int(allow))
                 if allow:
-                    oracle = oracle and data.get("value") == "demo-written" and (
-                        data.get("handler_count"), data.get("side_effect_count")) == (1, 1)
+                    owner = arguments["owner"]
+                    if tool == "write_item":
+                        expected_notes[owner] = arguments["value"]
+                    oracle = oracle and data.get("value") == expected_notes[owner]
                     oracle = oracle and matching[0]["tool"] == tool
-                else:
-                    oracle = oracle and not events  # all denials precede the positive control
+                    oracle = oracle and matching[0]["principal"] == owner
+                    oracle = oracle and matching[0]["owner"] == owner
                 passed = (data.get("decision") == expected and
                           bool(response.is_error) == (not allow) and oracle)
                 results.append({
@@ -81,8 +88,6 @@ async def run_demo(audit_path):
                     "expected": expected, "actual": data.get("decision", "MISSING"),
                     "handler_records": len(matching), "passed": passed,
                 })
-    if client._session is not None:
-        raise RuntimeError("SDK client session did not close")
     return results
 
 

@@ -23,6 +23,9 @@ class PermissionCore:
         self.effects = 0
 
     def invoke(self, name, args, token, emit):
+        principal = PRINCIPALS.get(token) if isinstance(token, str) else None
+        if principal is None:
+            return {"decision": "DENY_AUTHENTICATION"}, True
         schema = SCHEMAS.get(name)
         valid = schema is not None and isinstance(args, dict)
         if valid:
@@ -33,9 +36,6 @@ class PermissionCore:
             )
         if not valid:
             return {"decision": "REJECT_SCHEMA"}, True
-        principal = PRINCIPALS.get(token) if isinstance(token, str) else None
-        if principal is None:
-            return {"decision": "DENY_AUTHENTICATION"}, True
         user, role = principal
         if args["owner"] != user or (name != "read_item" and role != "writer"):
             return {"decision": "DENY_AUTHORIZATION"}, True
