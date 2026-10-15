@@ -3,6 +3,7 @@ node_modules/
 __pycache__/
 *.pyc
 artifacts/
+demo_result.md
 .pytest_cache/
 .env*
 data/
